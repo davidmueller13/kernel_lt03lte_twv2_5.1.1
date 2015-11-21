@@ -101,23 +101,6 @@ extern struct security_operations *security_ops;
 /* SECMARK reference count */
 static atomic_t selinux_secmark_refcount = ATOMIC_INIT(0);
 
-#ifdef CONFIG_SECURITY_SELINUX_DEVELOP
-int selinux_enforcing;
-
-static int __init enforcing_setup(char *str)
-{
-	unsigned long enforcing;
-	if (!strict_strtoul(str, 0, &enforcing))
-#ifdef CONFIG_ALWAYS_ENFORCE
-		selinux_enforcing = 1;
-#else
-		selinux_enforcing = enforcing ? 1 : 0;
-#endif
-	return 1;
-}
-__setup("enforcing=", enforcing_setup);
-#endif
-
 #ifdef CONFIG_SECURITY_SELINUX_BOOTPARAM
 int selinux_enabled = CONFIG_SECURITY_SELINUX_BOOTPARAM_VALUE;
 
@@ -4661,11 +4644,6 @@ static int selinux_nlmsg_perm(struct sock *sk, struct sk_buff *skb)
 				  "SELinux:  unrecognized netlink message"
 				  " type=%hu for sclass=%hu\n",
 				  nlh->nlmsg_type, sksec->sclass);
-#ifdef CONFIG_ALWAYS_ENFORCE
-			if (security_get_allow_unknown())
-#else
-			if (!selinux_enforcing || security_get_allow_unknown())
-#endif
 				err = 0;
 		}
 
@@ -5909,12 +5887,7 @@ static __init int selinux_init(void)
 
 	if (register_security(&selinux_ops))
 		panic("SELinux: Unable to register with kernel.\n");
-#ifdef CONFIG_ALWAYS_ENFORCE
-	selinux_enforcing = 1;
-#endif
-	if (selinux_enforcing)
-		printk(KERN_DEBUG "SELinux:  Starting in enforcing mode\n");
-	else
+
 		printk(KERN_DEBUG "SELinux:  Starting in permissive mode\n");
 
 	return 0;
