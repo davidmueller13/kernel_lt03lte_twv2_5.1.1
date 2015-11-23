@@ -105,7 +105,12 @@ abort:
 	mutex_unlock(&power_suspend_lock);
 }
 
+
+
+bool power_suspended = false;
+
 static void set_power_suspend_state(int new_state)
+
 {
 	unsigned long irqflags;
 	int old_sleep;
@@ -114,9 +119,11 @@ static void set_power_suspend_state(int new_state)
 	old_sleep = state;
 	if (!old_sleep && new_state == 1) {
 		state = new_state;
+		power_suspended = true;
 		queue_work(suspend_work_queue, &power_suspend_work);
 	} else if (!old_sleep || new_state == 0) {
 		state = new_state;
+		power_suspended = false;
 		queue_work(suspend_work_queue, &power_resume_work);
 	}
 	spin_unlock_irqrestore(&state_lock, irqflags);
