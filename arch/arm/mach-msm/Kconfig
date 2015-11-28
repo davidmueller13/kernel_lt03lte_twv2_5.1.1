@@ -4928,4 +4928,13 @@ config INTELLI_PLUG
 	bool "Enable intelli-plug cpu hotplug driver"
 	default n
 	help
-	  Generic Intelli-plug cpu hotplug driver for ARM SOCs
+	Generic Intelli-plug cpu hotplug driver for ARM SOCs
+
+
+config MSM_LIMITER
+	bool "MSM Frequency Limiter Driver"
+	depends on (LCD_NOTIFY || POWERSUSPEND || HAS_EARLYSUSPEND)
+	default n
+	help
+	  The MSM Frequency Limiter Driver controls max frequency limit for each CPU
+	  to desired value on suspend/resume
